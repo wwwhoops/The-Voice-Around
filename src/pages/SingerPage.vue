@@ -2,8 +2,13 @@
     <div class="table">
         <div class="container">
             <div class="handle-box">
-                <el-button type="primary" size="mini" @click="delAll">批量删除</el-button>
+                在当前页搜索：
                 <el-input v-model="select_word" size="mini" placeholder="请输入歌手名" class="handle-input"></el-input>
+                <br>
+                <br>
+                搜&nbsp;&nbsp;索&nbsp;&nbsp;全&nbsp;&nbsp;部&nbsp;：
+                <el-input v-model="keywords" size="mini" placeholder="请输入关键字" class="handle-input"></el-input>
+                <el-button type="primary" size="mini" @click="delAll">批量删除</el-button>
                 <el-button type="primary" size="mini" @click="centerDialogVisible = true">添加歌手</el-button>
             </div>
         </div>
@@ -20,10 +25,7 @@
                     </el-upload>
                 </template>
             </el-table-column>
-            <el-table-column label="歌手" width="120" align="center">
-                <template slot-scope="scope">
-                    {{scope.row.name}}
-                </template>
+            <el-table-column prop="name" label="歌手" width="120" align="center">
             </el-table-column>
             <el-table-column label="性别" width="50" align="center" >
                 <template slot-scope="scope">
@@ -35,17 +37,8 @@
                     {{attachBirth(scope.row.birth)}}
                 </template>
             </el-table-column>
-            <el-table-column label="地区" width="100" align="center">
-                <template slot-scope="scope">
-                    {{scope.row.location}}
-                </template>
-            </el-table-column>
-            <el-table-column label="简介">
-                <template slot-scope="scope">
-                    <p style="height:100px;">{{scope.row.introduction}}</p>
-                    <!-- overflow:scroll -->
-                </template>
-            </el-table-column>
+            <el-table-column prop="location" label="地区" width="100" align="center"></el-table-column>
+            <el-table-column prop="introduction" label="简介" align="center"></el-table-column>
             <el-table-column label="歌曲管理" width="110" align="center" prop="introduction">
                 <template slot-scope="scope">
                     <el-button size="mini" @click="songEdit(scope.row.id,scope.row.name)">歌曲管理</el-button>
@@ -58,15 +51,18 @@
                 </template>
             </el-table-column>
         </el-table>
-        <div class="pagination">
+        <div class="pagination" style="text-align: right">
             <el-pagination
+                v-show="total > 0"
                 background
-                layout = "total,prev,pager,next"
-                :current-page="currentPage"
-                :page-size="pageSize"
-                :total="tableData.length"
+                @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
-                >
+                :page.sync="pageNum"
+                :page-sizes="[2, 10, 20, 50]"
+                :limit.sync="pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total=this.total>
+                
             </el-pagination>
         </div>
 
@@ -171,10 +167,11 @@ export default {
                 introduction: ''
             },
             tableData: [],
-            tempData: [],
-            select_word: '',
-            pageSize: 5,    //分页每页大小
-            currentPage: 1,  //当前页
+            tempData: [], //表格中的临时数据，用于模糊搜索框
+            select_word: '', //搜索框中输入的文字
+            pageSize: 2,    //分页每页大小
+            pageNum: 1,  //当前页
+            total: 0,
             idx: -1,          //当前选择项
             multipleSelection: [],   //哪些项已经打勾
             singer: {}
@@ -183,7 +180,7 @@ export default {
     computed:{
         //计算当前搜索结果表里的数据
         data(){
-            return this.tableData.slice((this.currentPage - 1) * this.pageSize,this.currentPage * this.pageSize)
+            return this.tableData.slice((this.pageNum - 1) * this.pageSize,this.pageNum * this.pageSize)
         }
     },
     watch:{
@@ -207,16 +204,24 @@ export default {
     methods:{
         //获取当前页
         handleCurrentChange(val){
-            this.currentPage = val;
+            this.pageNum = val;
+            this.getData();
+        },
+        //获取当前页显示条数
+        handleSizeChange(val){
+            this.pageSize = val;
+            this.getData();
         },
         //查询所有歌手
         getData(){
             this.tempData = [];
             this.tableData = [];
-            getAllSinger().then(res => {
-                this.tempData = res;
-                this.tableData = res.data;
-                this.currentPage = 1;
+            var params = {pageSize:this.pageSize, pageNum:this.pageNum, name:this.name}
+            getAllSinger(params).then(res => {
+                this.tempData = res.data.records;
+                this.tableData = res.data.records;
+                this.total = res.data.total
+                // this.pageNum = 1;
             })
         },
         //添加歌手

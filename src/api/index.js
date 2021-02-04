@@ -6,7 +6,7 @@ export const getLoginStatus = (params) => post(`admin/login`,params);
 
 //============歌手相关================
 //查询歌手
-export const getAllSinger =() => get(`singer/allSinger`);
+export const getAllSinger =(params) => get(`singer/allSinger`, params);
 //添加歌手
 export const setSinger = (singer) => post(`singer/add`,singer);
 //编辑歌手

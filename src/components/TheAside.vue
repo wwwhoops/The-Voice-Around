@@ -30,17 +30,17 @@ export default {
             collapse: false,
             items:[
                 {
-                    icon: 'el-icon-document',
+                    icon: 'el-icon-s-home',
                     index: 'Info',
                     title: '系统首页'
                 },
                 {
-                    icon: 'el-icon-document',
+                    icon: 'el-icon-s-custom',
                     index: 'Consumer',
                     title: '用户管理'
                 },
                 {
-                    icon: 'el-icon-document',
+                    icon: 'el-icon-view',
                     index: 'Singer',
                     title: '歌手管理'
                 },
