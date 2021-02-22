@@ -7,7 +7,8 @@
                 <br>
                 <br>
                 搜&nbsp;&nbsp;索&nbsp;&nbsp;全&nbsp;&nbsp;部&nbsp;：
-                <el-input v-model="keywords" size="mini" placeholder="请输入关键字" class="handle-input"></el-input>
+                <el-input v-model="name" size="mini" placeholder="请输入歌手名" class="handle-input"></el-input>
+                <el-button type="primary" size="mini" @click="getData">搜索</el-button>
                 <el-button type="primary" size="mini" @click="delAll">批量删除</el-button>
                 <el-button type="primary" size="mini" @click="centerDialogVisible = true">添加歌手</el-button>
             </div>
@@ -21,7 +22,7 @@
                     </div>
                     <el-upload :action="uploadUrl(scope.row.id)" :before-upload="beforeAvatorUpload" 
                         :on-success="handleAvatorSuccess">
-                        <el-button size="mini">更新图片</el-button>
+                        <el-button size="mini">更改图片</el-button>
                     </el-upload>
                 </template>
             </el-table-column>
@@ -116,14 +117,21 @@
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item prop="birth" label="生日" size="mini">
-                    <el-date-picker type="date" placeholder="选择日期" v-model="form.birth" style="width:100%"></el-date-picker>
+                    <!-- <el-date-picker type="date" placeholder="选择日期" v-model="form.birth" style="width:100%"></el-date-picker> -->
+                    <el-date-picker
+                            v-model="form.birth"
+                            type="date"
+                            placeholder="选择日期"
+                            format="yyyy 年 MM 月 dd 日"
+                            value-format="yyyy-MM-dd">
+                        </el-date-picker>
                 </el-form-item>
                 <el-form-item prop="location" label="地区" size="mini">
                     <el-input v-model="form.location" placeholder="地区"></el-input>
                 </el-form-item>
                 <el-form-item prop="introduction" label="简介" size="mini">
                     <el-input v-model="form.introduction" placeholder="简介" type="textarea"></el-input>
-                </el-form-item>                
+                </el-form-item>          
             </el-form>
             <span slot="footer">
                 <el-button size="mini" @click="editVisible = false">取消</el-button>
@@ -142,7 +150,7 @@
 </template>
 
 <script>
-import {setSinger, getAllSinger,updateSinger,delSinger} from '../api/index';
+import {setSinger, getAllSingerPage,updateSinger,delSinger} from '../api/index';
 import { mixin } from '../mixins/index';
 export default {
     mixins: [mixin],
@@ -166,10 +174,11 @@ export default {
                 location: '',
                 introduction: ''
             },
+            name:'',
             tableData: [],
             tempData: [], //表格中的临时数据，用于模糊搜索框
             select_word: '', //搜索框中输入的文字
-            pageSize: 2,    //分页每页大小
+            pageSize: 10,    //分页每页大小
             pageNum: 1,  //当前页
             total: 0,
             idx: -1,          //当前选择项
@@ -216,8 +225,8 @@ export default {
         getData(){
             this.tempData = [];
             this.tableData = [];
-            var params = {pageSize:this.pageSize, pageNum:this.pageNum, name:this.name}
-            getAllSinger(params).then(res => {
+            var params = {pageSize:this.pageSize, pageNum:this.pageNum, singerName:this.name}
+            getAllSingerPage(params).then(res => {
                 this.tempData = res.data.records;
                 this.tableData = res.data.records;
                 this.total = res.data.total
@@ -230,25 +239,23 @@ export default {
             // let params = new URLSearchParams();
             // params.append('name',this.registerForm.name);
             // params.append('sex',this.registerForm.sex);
-            // params.append('pic','/img/singerPic/hhh.jpg');
             // params.append('birth',datetime);
             // params.append('location',this.registerForm.location);
             // params.append('introduction',this.registerForm.introduction);
             this.singer.name = this.registerForm.name;
             this.singer.sex = this.registerForm.sex;
-            this.singer.pic = null;
+            this.singer.pic = '/img/singerPic/singerDefault.jpg'; //添加歌手时设置默认图片
             this.singer.birth = datetime;
             this.singer.location = this.registerForm.location;
             this.singer.introduction = this.registerForm.introduction;
-            console.log(this.singer,'SINGER')
             var singer1 = this.singer
             setSinger(singer1)
             .then(res => {
                 if(res.code == 1){
                     this.getData();
-                    this.notify("添加成功","success");
+                    this.notify(res.message,"success");
                 }else{
-                    this.notify("添加失败","error");
+                    this.notify(res.message,"error");
                 }
             })
             .catch(err => {
@@ -270,23 +277,30 @@ export default {
         },
         //保存编辑页面修改的数据
         editSave(){
-            let d = new Date(this.form.birth);
-            let datetime = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
-            let params = new URLSearchParams();
-            params.append('id',this.form.id);
-            params.append('name',this.form.name);
-            params.append('sex',this.form.sex);
-            params.append('birth',datetime);
-            params.append('location',this.form.location);
-            params.append('introduction',this.form.introduction);
-
-            updateSinger(params)
+            // let d = new Date(this.form.birth);
+            let datetime = this.form.birth
+            // let params = new URLSearchParams();
+            // params.append('id',this.form.id);
+            // params.append('name',this.form.name);
+            // params.append('sex',this.form.sex);
+            // params.append('birth',datetime);
+            // params.append('location',this.form.location);
+            // params.append('introduction',this.form.introduction);
+            this.singer.id = this.form.id
+            this.singer.name = this.form.name;
+            this.singer.sex = this.form.sex;
+            this.singer.pic = null;
+            this.singer.birth = datetime;
+            this.singer.location = this.form.location;
+            this.singer.introduction = this.form.introduction;
+            var singer1 = this.singer
+            updateSinger(singer1)
             .then(res => {
                 if(res.code == 1){
                     this.getData();
-                    this.notify("修改成功","success");
+                    this.notify(res.message,"success");
                 }else{
-                    this.notify("修改失败","error");
+                    this.notify(res.message,"error");
                 }
             })
             .catch(err => {

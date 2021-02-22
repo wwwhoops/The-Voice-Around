@@ -1,7 +1,7 @@
 <template>
     <div class="table">
         <div class="crumbs">
-            <i class="el-icon-tickets"></i>歌曲信息
+            <i class="el-icon-tickets" style="font-size: 18px; padding-top: 18px">{{this.singerName}}-音乐列表</i>
         </div>
         <div class="container">
             <div class="handle-box">

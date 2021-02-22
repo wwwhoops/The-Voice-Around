@@ -6,13 +6,13 @@ export const getLoginStatus = (params) => post(`admin/login`,params);
 
 //============歌手相关================
 //查询歌手
-export const getAllSinger =(params) => get(`singer/allSinger`, params);
+export const getAllSingerPage =(params) => get(`singer/allSingerPage`, params);
 //添加歌手
 export const setSinger = (singer) => post(`singer/add`,singer);
 //编辑歌手
-export const updateSinger = (params) => post(`singer/update`,params);
+export const updateSinger = (singer) => post(`singer/updateSingerInfo`,singer);
 //删除歌手
-export const delSinger = (id) => get(`singer/delete?id=${id}`);
+export const delSinger = (id) => get(`singer/deleteASinger?id=${id}`);
 
 //============歌曲相关================
 //根据歌手id查询歌曲
