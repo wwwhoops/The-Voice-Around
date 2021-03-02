@@ -33,14 +33,14 @@ export const mixin = {
         },
         //上传图片之前的校验
         beforeAvatorUpload(file){
-            const isJPG = (file.type === 'image/jpeg')||(file.type === 'image/png');
+            const isJPG = (file.type === 'image/jpeg')||(file.type === 'image/png')||(file.type === 'image/jpg');
             if(!isJPG){
-                this.$message.error('上传头像图片只能是jpg或png格式');
+                this.$message.error('图片类型错误');
                 return false;
             }
-            const isLt2M = (file.size / 1024 /1024) < 5;
+            const isLt2M = (file.size / 1024 /1024) < 10;
             if(!isLt2M){
-                this.$message.error('上传头像图片大小不能超过5MB');
+                this.$message.error('图片过大');
                 return false;
             }
             return true;
@@ -71,7 +71,7 @@ export const mixin = {
             this.multipleSelection = val;
         },
         //批量删除已经选择的项
-        delAll(){
+        delBatch(){
             for(let item of this.multipleSelection){
                 this.handleDelete(item.id);
                 this.deleteRow();

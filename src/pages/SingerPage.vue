@@ -9,7 +9,7 @@
                 搜&nbsp;&nbsp;索&nbsp;&nbsp;全&nbsp;&nbsp;部&nbsp;：
                 <el-input v-model="name" size="mini" placeholder="请输入歌手名" class="handle-input"></el-input>
                 <el-button type="primary" size="mini" @click="getData">搜索</el-button>
-                <el-button type="primary" size="mini" @click="delAll">批量删除</el-button>
+                <el-button type="primary" size="mini" @click="delBatch">批量删除</el-button>
                 <el-button type="primary" size="mini" @click="centerDialogVisible = true">添加歌手</el-button>
             </div>
         </div>
@@ -174,16 +174,16 @@ export default {
                 location: '',
                 introduction: ''
             },
-            name:'',
-            tableData: [],
+            name:'', //歌手名
+            tableData: [], //表格数据
             tempData: [], //表格中的临时数据，用于模糊搜索框
             select_word: '', //搜索框中输入的文字
             pageSize: 10,    //分页每页大小
             pageNum: 1,  //当前页
-            total: 0,
+            total: 0, //查询总数
             idx: -1,          //当前选择项
             multipleSelection: [],   //哪些项已经打勾
-            singer: {}
+            singer: {} //歌手对象
         }
     },
     computed:{
@@ -244,7 +244,7 @@ export default {
             // params.append('introduction',this.registerForm.introduction);
             this.singer.name = this.registerForm.name;
             this.singer.sex = this.registerForm.sex;
-            this.singer.pic = '/img/singerPic/singerDefault.jpg'; //添加歌手时设置默认图片
+            this.singer.pic = '/img/singerPic/defaultSingerImg.jpg'; //添加歌手时设置默认图片
             this.singer.birth = datetime;
             this.singer.location = this.registerForm.location;
             this.singer.introduction = this.registerForm.introduction;

@@ -5,8 +5,14 @@
         </div>
         <div class="container">
             <div class="handle-box">
-                <el-button type="primary" size="mini" @click="delAll">批量删除</el-button>
+                在当前页搜索：
                 <el-input v-model="select_word" size="mini" placeholder="请输入歌曲名" class="handle-input"></el-input>
+                <br>
+                <br>
+                搜&nbsp;&nbsp;索&nbsp;&nbsp;全&nbsp;&nbsp;部&nbsp;：
+                <el-input v-model="songName" size="mini" placeholder="请输入歌曲名" class="handle-input"></el-input>
+                <el-button type="primary" size="mini" @click="getData">搜索</el-button>
+                <el-button type="primary" size="mini" @click="delBatch">批量删除</el-button>
                 <el-button type="primary" size="mini" @click="centerDialogVisible = true">添加歌曲</el-button>
             </div>
         </div>
@@ -31,11 +37,11 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop="name" label="歌手-歌名" width="120" align="center"></el-table-column>
-            <el-table-column prop="introduction" label="专辑" width="150" align="center"></el-table-column>
+            <el-table-column prop="name" label="歌名" width="120" align="center"></el-table-column>
+            <el-table-column prop="album" label="专辑" width="150" align="center"></el-table-column>
             <el-table-column label="歌词" align="center">
                 <template slot-scope="scope">
-                    <ul style="height:100px;overflow:scroll;">
+                    <ul style="height:100px;overflow-y:scroll;">
                         <li v-for="(item,index) in parseLyric(scope.row.lyric)" :key="index">
                             {{item}}
                         </li>
@@ -67,7 +73,8 @@
             <el-pagination
                 background
                 layout = "total,prev,pager,next"
-                :current-page="currentPage"
+                :current-page="pageNum"
+                :page.sync="pageNum"
                 :page-size="pageSize"
                 :total="tableData.length"
                 @current-change="handleCurrentChange"
@@ -79,15 +86,15 @@
             <el-form :model="registerForm" ref="registerForm" label-width="80px" action="" id="tf">
                 <div>
                     <label>歌名</label>
-                    <el-input type="text" name="name"></el-input>
+                    <el-input v-model="registerForm.name" type="text" name="name"></el-input>
                 </div>
                 <div>
                     <label>专辑</label>
-                    <el-input type="text" name="introduction"></el-input>
+                    <el-input v-model="registerForm.album" type="text" name="album"></el-input>
                 </div>
                 <div>
                     <label>歌词</label>
-                    <el-input type="textarea" name="lyric"></el-input>
+                    <el-input v-model="registerForm.lyric" type="textarea" name="lyric"></el-input>
                 </div>
                 <div>
                     <label>歌曲上传</label>
@@ -102,11 +109,11 @@
 
         <el-dialog title="修改歌曲" :visible.sync="editVisible" width="400px" center>
             <el-form :model="form" ref="form" label-width="80px">
-                <el-form-item prop="name" label="歌手-歌名" size="mini">
-                    <el-input v-model="form.name" placeholder="歌手-歌名"></el-input>
+                <el-form-item prop="name" label="歌名" size="mini">
+                    <el-input v-model="form.name" placeholder="歌名"></el-input>
                 </el-form-item>                
-                <el-form-item prop="introduction" label="专辑" size="mini">
-                    <el-input v-model="form.introduction" placeholder="专辑"></el-input>
+                <el-form-item prop="album" label="专辑" size="mini">
+                    <el-input v-model="form.album" placeholder="专辑"></el-input>
                 </el-form-item> 
                 <el-form-item prop="lyric" label="歌词" size="mini">
                     <el-input v-model="form.lyric" placeholder="歌词" type="textarea"></el-input>
@@ -147,23 +154,26 @@ export default {
             registerForm:{      //添加框
                 name: '',
                 singerName: '',                
-                introduction: '',
+                album: '',
                 lyric: ''
             },
             form:{      //编辑框
                 id: '',
                 name: '',
-                introduction: '',
-                lyric: ''
+                album: '',
+                lyric: '',
             },
-            tableData: [],
-            tempData: [],
-            select_word: '',
-            pageSize: 5,    //分页每页大小
-            currentPage: 1,  //当前页
-            idx: -1,          //当前选择项
+            songName: '', //搜索全部输入框歌手姓名
+            tableData: [], //表格数据
+            tempData: [], //临时数据，用于当前页的模糊查询
+            select_word: '', //当前页模糊查询中的值
+            pageSize: 10,    //分页每页大小
+            pageNum: 1, //当前页
+            total: 0, //查询总数
+            idx: -1,  //当前选择项
             multipleSelection: [],   //哪些项已经打勾
-            toggle: false           //播放器的图标状态
+            toggle: false,           //播放器的图标状态
+            song: {} //歌曲对象
         }
     },
     computed:{
@@ -172,7 +182,7 @@ export default {
         ]),
         //计算当前搜索结果表里的数据
         data(){
-            return this.tableData.slice((this.currentPage - 1) * this.pageSize,this.currentPage * this.pageSize)
+            return this.tableData.slice((this.pageNum - 1) * this.pageSize,this.pageNum * this.pageSize)
         }
     },
     watch:{
@@ -201,24 +211,28 @@ export default {
     methods:{
         //获取当前页
         handleCurrentChange(val){
-            this.currentPage = val;
+            this.pageNum = val;
         },
-        //查询所有歌手
+        //查询某位歌手的所有歌曲
         getData(){
             this.tempData = [];
             this.tableData = [];
-            songOfSingerId(this.singerId).then(res => {
-                this.tempData = res;
-                this.tableData = res;
-                this.currentPage = 1;
+            var params = {pageSize:this.pageSize, pageNum:this.pageNum, songName:this.name, singerId:this.singerId}
+            // var params = {pageSize:this.pageSize, pageNum:this.pageNum, songName:this.songName, singerId:this.singerId}
+            songOfSingerId(params).then(res => {
+                this.tempData = res.data.records;
+                this.tableData = res.data.records;
+                this.total = res.data.total
+                this.pageNum = 1;
             })
         },
-        //添加歌手
+        //添加歌曲
         addSong(){
             let _this = this;
             var form = new FormData(document.getElementById('tf'));
             form.append('singerId',this.singerId);
-            form.set('name',this.singerName+'-'+form.get('name'));
+            // form.set('name',this.singerName+'-'+form.get('name'));
+            form.set('name', form.get('name'));
             if(!form.get('lyric')){
                 form.set('lyric','[00:00:00]暂无歌词');
             }
@@ -228,12 +242,12 @@ export default {
                 //req.status == 200 和后台正常交互完成
                 if(req.readyState == 4 && req.status == 200){
                     let res = JSON.parse(req.response);
-                    if(res.code){
+                    if(res.code == 1){
                         _this.getData();
                         _this.registerForm = {};
-                        _this.notify(res.msg,'success');
+                        _this.notify(res.message,'success');
                     }else{
-                         _this.notify('保存失败','error');
+                         _this.notify(res.message,'error');
                     }
                 }
             }
@@ -247,25 +261,25 @@ export default {
             this.form = {
                 id: row.id,
                 name: row.name,
-                introduction: row.introduction,
-                lyric: row.lyric
+                album: row.album,
+                lyric: row.lyric,
             }
         },
         //保存编辑页面修改的数据
-        editSave(){
-            let params = new URLSearchParams();
-            params.append('id',this.form.id);
-            params.append('name',this.form.name);
-            params.append('introduction',this.form.introduction);
-            params.append('lyric',this.form.lyric);
+        editSave(){            
+            this.song.id = this.form.id
+            this.song.name = this.form.name;
+            this.song.album = this.form.album;
+            this.song.lyric = this.form.lyric;
+            var song1 = this.song
 
-            updateSong(params)
+            updateSong(song1)
             .then(res => {
                 if(res.code == 1){
                     this.getData();
-                    this.notify("修改成功","success");
+                    this.notify(res.message,"success");
                 }else{
-                    this.notify("修改失败","error");
+                    this.notify(res.message,"error");
                 }
             })
             .catch(err => {
@@ -283,9 +297,9 @@ export default {
             .then(res => {
                 if(res){
                     this.getData();
-                    this.notify("删除成功","success");
+                    this.notify(res.message,"success");
                 }else{
-                    this.notify("删除失败","error");
+                    this.notify(res.message,"error");
                 }
             })
             .catch(err => {
@@ -309,7 +323,7 @@ export default {
             var testMsg = file.name.substring(file.name.lastIndexOf('.') + 1);
             if(testMsg!='mp3'){
                 this.$message({
-                    message: '上传文件只能是mp3格式',
+                    message: '文件格式错误',
                     type: 'error'
                 });
                 return false;
@@ -322,28 +336,29 @@ export default {
             if(res.code == 1){
                 _this.getData();
                 _this.$notify({
-                    title: '上传成功',
+                    title: res.message,
                     type: 'success'
                 });
             }else{
                 _this.$notify({
-                    title: '上传失败',
+                    title: res.message,
                     type: 'error'
                 });
             }
         },
         //更新歌曲url
         uploadSongUrl(id){
-            return `${this.$store.state.HOST}/song/updateSongUrl?id=${id}`
+            return `${this.$store.state.HOST}/song/updateSong?id=${id}`
         },
         //切换播放歌曲
-        setSongUrl(url,name) {
-            this.toggle = name;
-            this.$store.commit('setUrl',this.$store.state.HOST + url);
-            if(this.isPlay){
-                this.$store.commit('setIsPlay',false);
-            }else{
-                this.$store.commit('setIsPlay',true);
+        setSongUrl(url,name){
+         if(this.toggle==name){
+             this.toggle=false;
+             this.$store.commit('setIsPlay',false);
+         }else{
+             this.toggle=name;
+             this.$store.commit('setUrl',this.$store.state.HOST+'/'+url);
+             this.$store.commit('setIsPlay',true);
             }
         }
     }   
