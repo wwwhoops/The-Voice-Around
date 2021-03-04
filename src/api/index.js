@@ -5,8 +5,10 @@ export const getLoginStatus = (params) => post(`admin/login`,params);
 
 
 //============歌手相关================
-//查询歌手
+//分页，模糊查询歌手
 export const getAllSingerPage =(params) => get(`singer/allSingerPage`, params);
+//不分页查询所有歌手
+export const allSinger =() => get(`singer/allSinger`);
 //添加歌手
 export const setSinger = (singer) => post(`singer/add`,singer);
 //编辑歌手
@@ -17,6 +19,8 @@ export const delSinger = (id) => get(`singer/deleteASinger?id=${id}`);
 //============歌曲相关================
 //根据歌手id查询歌曲
 export const songOfSingerId =(params) => get(`song/singerSongPage`, params);
+// //根据歌手id查询该歌手的全部歌曲
+// export const songOfSingerId =(params) => get(`song/singerSongPage`, params);
 //编辑歌曲
 export const updateSong = (song) => post(`song/updateSongInfo`,song);
 //删除歌曲
@@ -26,25 +30,25 @@ export const songOfSongId =(id) => get(`song/detail?songId=${id}`);
 //根据歌曲名获取歌曲对象
 export const songOfSongName =(songName) => get(`song/songOfSongName?songName=${songName}`);
 //查询所有歌曲
-export const allSong =() => get(`song/allSong`);
+export const allSong =(singerId) => get(`song/allSong?singerId=${singerId}`);
 
 //============歌单相关================
 //查询歌单
-export const getAllSongList =() => get(`songList/allSongList`);
+export const getAllSongList =(params) => get(`songList/getAllSongList`,params);
 //添加歌单
-export const setSongList = (params) => post(`songList/add`,params);
+export const setSongList = (songList) => post(`songList/addSongList`,songList);
 //编辑歌单
-export const updateSongList = (params) => post(`songList/update`,params);
+export const updateSongList = (params) => post(`songList/updateSongList`,params);
 //删除歌单
-export const delSongList = (id) => get(`songList/delete?id=${id}`);
+export const delSongList = (id) => get(`songList/deleteASongList?id=${id}`);
 
 //============歌单的歌曲相关============
 //根据歌单id查询歌曲列表
-export const listSongDetail = (songListId) => get(`listSong/detail?songListId=${songListId}`);
+export const listSongDetail = (songListId) => get(`listSong/getListSong?songListId=${songListId}`);
 //给歌单增加歌曲
-export const listSongAdd = (params) => post(`listSong/add`,params);
+export const listSongAdd = (listSong) => post(`listSong/addSongToSongList`,listSong);
 //删除歌单的歌曲
-export const delListSong = (songId,songListId) => get(`listSong/delete?songId=${songId}&songListId=${songListId}`);
+export const delListSong = (songListId,songId) => get(`listSong/deleteASongFromSongList?songListId=${songListId}&songId=${songId}`);
 
 //============用户相关================
 //查询用户

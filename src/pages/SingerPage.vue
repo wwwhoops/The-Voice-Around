@@ -318,9 +318,9 @@ export default {
             .then(res => {
                 if(res){
                     this.getData();
-                    this.notify("删除成功","success");
+                    this.notify(res.message,"success");
                 }else{
-                    this.notify("删除失败","error");
+                    this.notify(res.message,"error");
                 }
             })
             .catch(err => {

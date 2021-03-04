@@ -2,12 +2,18 @@
     <div class="table">
         <div class="container">
             <div class="handle-box">
-                <el-button type="primary" size="mini" @click="delAll">批量删除</el-button>
+                在当前页搜索：
                 <el-input v-model="select_word" size="mini" placeholder="筛选关键字" class="handle-input"></el-input>
+                <br>
+                <br>
+                搜&nbsp;&nbsp;索&nbsp;&nbsp;全&nbsp;&nbsp;部&nbsp;：
+                <el-input v-model="title" size="mini" placeholder="请输入歌单名" class="handle-input"></el-input>
+                <el-button type="primary" size="mini" @click="getData">搜索</el-button>
+                <el-button type="primary" size="mini" @click="delBatch">批量删除</el-button>
                 <el-button type="primary" size="mini" @click="centerDialogVisible = true">添加歌单</el-button>
             </div>
         </div>
-        <el-table size="mini" ref="multipleTable" border style="width:100%" height="680px" :data="data" @selection-change="handleSelectionChange">
+        <el-table size="mini" ref="multipleTable" border style="width:100%" height="680px" :data="tableData" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="40"></el-table-column>
             <el-table-column label="歌单图片" width="110" align="center">
                 <template slot-scope="scope">
@@ -21,20 +27,20 @@
                 </template>
             </el-table-column>
             <el-table-column prop="title" label="标题" width="120" align="center"></el-table-column>     
-            <el-table-column label="简介">
+            <el-table-column label="简介" width="400" align="center">
                 <template slot-scope="scope">
-                    <p style="height:100px;overflow:scroll">{{scope.row.introduction}}</p>
+                    <p style="height:100px;overflow-y:scroll">{{scope.row.introduction}}</p>
                 </template>
             </el-table-column>
             <el-table-column prop="style" label="风格" width="120" align="center"></el-table-column> 
             <el-table-column label="歌曲管理" width="110" align="center">
                 <template slot-scope="scope">
-                    <el-button size="mini" @click="songEdit(scope.row.id)">歌曲管理</el-button>
+                    <el-button size="mini" @click="songEdit(scope.row.id, scope.row.title)">歌曲管理</el-button>
                 </template>
             </el-table-column>
             <el-table-column label="评论" width="80" align="center">
                 <template slot-scope="scope">
-                    <el-button size="mini" @click="getComment(data[scope.$index].id)">评论</el-button>
+                    <el-button size="mini" @click="getComment(data[scope.$index].id, data[scope.$index].title)">评论</el-button>
                 </template>    
             </el-table-column>  
             <el-table-column label="操作" width="150" align="center">
@@ -44,15 +50,18 @@
                 </template>
             </el-table-column>
         </el-table>
-        <div class="pagination">
+        <div class="pagination" style="text-align: right">
             <el-pagination
+                v-show="total > 0"
                 background
-                layout = "total,prev,pager,next"
-                :current-page="currentPage"
-                :page-size="pageSize"
-                :total="tableData.length"
+                @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
-                >
+                :page.sync="pageNum"
+                :page-sizes="[2, 10, 20, 50]"
+                :limit.sync="pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total=this.total>
+                
             </el-pagination>
         </div>
 
@@ -126,16 +135,20 @@ export default {
             tableData: [],
             tempData: [],
             select_word: '',
-            pageSize: 5,    //分页每页大小
-            currentPage: 1,  //当前页
+            pageSize: 10,    //分页每页大小
+            pageNum: 1,  //当前页
+            total: 0, //查询总数
             idx: -1,          //当前选择项
-            multipleSelection: []   //哪些项已经打勾
+            multipleSelection: [],   //哪些项已经打勾
+            songList: {},     //歌单对象
+            title: '',   //歌单标题
+            // songListTitle: '', //歌单标题
         }
     },
     computed:{
         //计算当前搜索结果表里的数据
         data(){
-            return this.tableData.slice((this.currentPage - 1) * this.pageSize,this.currentPage * this.pageSize)
+            return this.tableData.slice((this.pageNum - 1) * this.pageSize,this.pageNum * this.pageSize)
         }
     },
     watch:{
@@ -159,33 +172,39 @@ export default {
     methods:{
         //获取当前页
         handleCurrentChange(val){
-            this.currentPage = val;
+            this.pageNum = val;
+            this.getData();
+        },
+        //获取当前页显示条数
+        handleSizeChange(val){
+            this.pageSize = val;
+            this.getData();
         },
         //查询所有歌单
         getData(){
             this.tempData = [];
             this.tableData = [];
-            getAllSongList().then(res => {
-                this.tempData = res;
-                this.tableData = res;
-                this.currentPage = 1;
+            var params = {pageSize:this.pageSize, pageNum:this.pageNum, title:this.title}
+            getAllSongList(params).then(res => {
+                this.tempData = res.data.records;
+                this.tableData = res.data.records;
+                this.total = res.data.total
             })
         },
         //添加歌单
         addSongList(){
-            let params = new URLSearchParams();
-            params.append('title',this.registerForm.title);
-            params.append('pic','/img/songListPic/123.jpg');
-            params.append('introduction',this.registerForm.introduction);
-            params.append('style',this.registerForm.style);
-
-            setSongList(params)
+            this.songList.title = this.registerForm.title;
+            this.songList.pic = '/img/songListPic/defaultSongListImg.jpg'; //添加歌单时设置默认图片
+            this.songList.introduction = this.registerForm.introduction;
+            this.songList.style = this.registerForm.style;
+            var songList1 = this.songList
+            setSongList(songList1)
             .then(res => {
                 if(res.code == 1){
                     this.getData();
-                    this.notify("添加成功","success");
+                    this.notify(res.message,"success");
                 }else{
-                    this.notify("添加失败","error");
+                    this.notify(res.message,"error");
                 }
             })
             .catch(err => {
@@ -205,19 +224,19 @@ export default {
         },
         //保存编辑页面修改的数据
         editSave(){
-            let params = new URLSearchParams();
-            params.append('id',this.form.id);
-            params.append('title',this.form.title);
-            params.append('introduction',this.form.introduction);
-            params.append('style',this.form.style);
+            this.songList.id = this.form.id
+            this.songList.title = this.form.title;
+            this.songList.introduction = this.form.introduction;
+            this.songList.style = this.form.style;
+            var songList1 = this.songList
 
-            updateSongList(params)
+            updateSongList(songList1)
             .then(res => {
                 if(res.code == 1){
                     this.getData();
-                    this.notify("修改成功","success");
+                    this.notify(res.message,"success");
                 }else{
-                    this.notify("修改失败","error");
+                    this.notify(res.message,"error");
                 }
             })
             .catch(err => {
@@ -235,9 +254,9 @@ export default {
             .then(res => {
                 if(res){
                     this.getData();
-                    this.notify("删除成功","success");
+                    this.notify(res.message,"success");
                 }else{
-                    this.notify("删除失败","error");
+                    this.notify(res.message,"error");
                 }
             })
             .catch(err => {
@@ -246,12 +265,12 @@ export default {
             this.delVisible = false;
         },
         //转向歌曲管理页面
-        songEdit(id,name){
-            this.$router.push({path:`/ListSong`,query:{id}});
+        songEdit(id,title){
+            this.$router.push({path:`/ListSong`,query:{id,title}});
         },
         //转向该歌单的评论列表
-        getComment(id){
-            this.$router.push({path: '/comment',query:{id}})
+        getComment(id,title){
+            this.$router.push({path: '/commentPage',query:{id,title}})
         }
     }
 }

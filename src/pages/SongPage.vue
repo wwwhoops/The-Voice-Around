@@ -16,7 +16,7 @@
                 <el-button type="primary" size="mini" @click="centerDialogVisible = true">添加歌曲</el-button>
             </div>
         </div>
-        <el-table size="mini" ref="multipleTable" border style="width:100%" height="680px" :data="data" @selection-change="handleSelectionChange">
+        <el-table size="mini" ref="multipleTable" border style="width:100%" height="680px" :data="tableData" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="40"></el-table-column>
             <el-table-column label="歌曲图片" width="110" align="center">
                 <template slot-scope="scope">
@@ -71,14 +71,16 @@
         </el-table>
         <div class="pagination">
             <el-pagination
+                v-show="total > 0"
                 background
-                layout = "total,prev,pager,next"
-                :current-page="pageNum"
-                :page.sync="pageNum"
-                :page-size="pageSize"
-                :total="tableData.length"
+                @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
-                >
+                :page.sync="pageNum"
+                :page-sizes="[1, 10, 20, 50]"
+                :limit.sync="pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total=this.total>
+                
             </el-pagination>
         </div>
 
@@ -212,18 +214,23 @@ export default {
         //获取当前页
         handleCurrentChange(val){
             this.pageNum = val;
+            this.getData();
+        },
+        //获取当前页显示条数
+        handleSizeChange(val){
+            this.pageSize = val;
+            this.getData();
         },
         //查询某位歌手的所有歌曲
         getData(){
             this.tempData = [];
             this.tableData = [];
-            var params = {pageSize:this.pageSize, pageNum:this.pageNum, songName:this.name, singerId:this.singerId}
+            var params = {pageSize:this.pageSize, pageNum:this.pageNum, songName:this.songName, singerId:this.singerId}
             // var params = {pageSize:this.pageSize, pageNum:this.pageNum, songName:this.songName, singerId:this.singerId}
             songOfSingerId(params).then(res => {
                 this.tempData = res.data.records;
                 this.tableData = res.data.records;
                 this.total = res.data.total
-                this.pageNum = 1;
             })
         },
         //添加歌曲
