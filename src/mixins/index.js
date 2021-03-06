@@ -32,7 +32,7 @@ export const mixin = {
             return String(val).substr(0,10);
         },
         //上传图片之前的校验
-        beforeAvatorUpload(file){
+        beforeAvatarUpload(file){
             const isJPG = (file.type === 'image/jpeg')||(file.type === 'image/png')||(file.type === 'image/jpg');
             if(!isJPG){
                 this.$message.error('图片类型错误');
@@ -46,7 +46,7 @@ export const mixin = {
             return true;
         },
         //上传图片成功之后要做的工作
-        handleAvatorSuccess(res){
+        handleAvatarSuccess(res){
             let _this = this;
             if(res.code == 1){
                 _this.getData();

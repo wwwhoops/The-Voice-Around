@@ -2,20 +2,26 @@
     <div class="table">
         <div class="container">
             <div class="handle-box">
-                <el-button type="primary" size="mini" @click="delAll">批量删除</el-button>
-                <el-input v-model="select_word" size="mini" placeholder="筛选相关用户" class="handle-input"></el-input>
+                在当前页搜索：
+                <el-input v-model="select_word" size="mini" placeholder="请输入用户名" class="handle-input"></el-input>
+                <br>
+                <br>
+                搜&nbsp;&nbsp;索&nbsp;&nbsp;全&nbsp;&nbsp;部&nbsp;：
+                <el-input v-model="username" size="mini" placeholder="请输入用户名" class="handle-input"></el-input>
+                <el-button type="primary" size="mini" @click="getData">搜索</el-button>
+                <el-button type="primary" size="mini" @click="delBatch">批量删除</el-button>
                 <el-button type="primary" size="mini" @click="centerDialogVisible = true">添加新用户</el-button>
             </div>
         </div>
-        <el-table size="mini" ref="multipleTable" border style="width:100%" height="680px" :data="data" @selection-change="handleSelectionChange">
+        <el-table size="mini" ref="multipleTable" border style="width:100%" height="680px" :data="tableData" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="40"></el-table-column>
             <el-table-column label="用户图片" width="110" align="center">
                 <template slot-scope="scope">
                     <div class="consumer-img">
-                        <img :src="getUrl(scope.row.avator)" style="width:100%"/>
+                        <img :src="getUrl(scope.row.avatar)" style="width:100%"/>
                     </div>
-                    <el-upload :action="uploadUrl(scope.row.id)" :before-upload="beforeAvatorUpload" 
-                        :on-success="handleAvatorSuccess">
+                    <el-upload :action="uploadUrl(scope.row.id)" :before-upload="beforeAvatarUpload" 
+                        :on-success="handleAvatarSuccess">
                         <el-button size="mini">更新图片</el-button>
                     </el-upload>
                 </template>
@@ -49,13 +55,17 @@
         </el-table>
         <div class="pagination">
             <el-pagination
+                v-show="total > 0"
                 background
-                layout = "total,prev,pager,next"
-                :current-page="currentPage"
-                :page-size="pageSize"
-                :total="tableData.length"
+                @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
+                :page.sync="pageNum"
+                :page-sizes="[2, 10, 20, 50]"
+                :limit.sync="pageSize"
+                :total=this.total
+                layout="total, sizes, prev, pager, next, jumper"
                 >
+                
             </el-pagination>
         </div>
 
@@ -68,8 +78,8 @@
                     <el-input type="password" v-model="registerForm.password" placeholder="密码"></el-input>
                 </el-form-item>
                 <el-form-item label="性别" size="mini">
-                    <input type="radio" name="sex" value="0" v-model="registerForm.sex">&nbsp;女&nbsp;&nbsp;
-                    <input type="radio" name="sex" value="1" v-model="registerForm.sex">&nbsp;男
+                    <input type="radio" name="sex" :value=1 v-model="registerForm.sex">&nbsp;男&nbsp;&nbsp;
+                    <input type="radio" name="sex" :value=0 v-model="registerForm.sex">&nbsp;女
                 </el-form-item>
                 <el-form-item prop="phoneNum" label="手机号" size="mini">
                     <el-input v-model="registerForm.phoneNum" placeholder="手机号"></el-input>
@@ -78,7 +88,14 @@
                     <el-input v-model="registerForm.email" placeholder="电子邮箱"></el-input>
                 </el-form-item>
                 <el-form-item prop="birth" label="生日" size="mini">
-                    <el-date-picker type="date" placeholder="选择日期" v-model="registerForm.birth" style="width:100%"></el-date-picker>
+                    <!-- <el-date-picker type="date" placeholder="选择日期" v-model="registerForm.birth" style="width:100%"></el-date-picker> -->
+                    <el-date-picker
+                        v-model="registerForm.birth"
+                        type="date"
+                        placeholder="选择日期"
+                        format="yyyy 年 MM 月 dd 日"
+                        value-format="yyyy-MM-dd">
+                    </el-date-picker>
                 </el-form-item>
                 <el-form-item prop="introduction" label="签名" size="mini">
                     <el-input v-model="registerForm.introduction" placeholder="签名"></el-input>
@@ -102,8 +119,8 @@
                     <el-input type="password" v-model="form.password" placeholder="密码"></el-input>
                 </el-form-item>
                 <el-form-item label="性别" size="mini">
-                    <input type="radio" name="sex" value="0" v-model="form.sex">&nbsp;女&nbsp;&nbsp;
-                    <input type="radio" name="sex" value="1" v-model="form.sex">&nbsp;男
+                    <input type="radio" name="sex" :value=0 v-model="form.sex">&nbsp;女&nbsp;&nbsp;
+                    <input type="radio" name="sex" :value=1 v-model="form.sex">&nbsp;男
                 </el-form-item>
                 <el-form-item prop="phoneNum" label="手机号" size="mini">
                     <el-input v-model="form.phoneNum" placeholder="手机号"></el-input>
@@ -112,7 +129,14 @@
                     <el-input v-model="form.email" placeholder="电子邮箱"></el-input>
                 </el-form-item>
                 <el-form-item prop="birth" label="生日" size="mini">
-                    <el-date-picker type="date" placeholder="选择日期" v-model="form.birth" style="width:100%"></el-date-picker>
+                    <!-- <el-date-picker type="date" placeholder="选择日期" v-model="form.birth" style="width:100%"></el-date-picker> -->
+                    <el-date-picker
+                        v-model="registerForm.birth"
+                        type="date"
+                        placeholder="选择日期"
+                        format="yyyy 年 MM 月 dd 日"
+                        value-format="yyyy-MM-dd">
+                    </el-date-picker>
                 </el-form-item>
                 <el-form-item prop="introduction" label="签名" size="mini">
                     <el-input v-model="form.introduction" placeholder="签名"></el-input>
@@ -150,7 +174,7 @@ export default {
             registerForm:{      //添加框
                 username: '',
                 password: '',
-                sex: '1',
+                sex: 1, //性别默认为男
                 phoneNum: '',
                 email: '',
                 birth: '',
@@ -171,10 +195,13 @@ export default {
             tableData: [],
             tempData: [],
             select_word: '',
-            pageSize: 5,    //分页每页大小
-            currentPage: 1,  //当前页
+            pageSize: 10,    //分页每页大小
+            pageNum: 1,  //当前页
             idx: -1,          //当前选择项
             multipleSelection: [],   //哪些项已经打勾
+            total: 0, //查询记录数
+            consumer: {}, //用户对象
+            username: '', //搜索框输入的用户名
             rules: {
                 username: [
                     {required: true,message: '请输入用户名',trigger: 'blur'}
@@ -183,30 +210,45 @@ export default {
                     {required: true,message: '请输入密码',trigger: 'blur'}
                 ],
                 phoneNum: [
-                    {required: true,message: '请输入手机号',trigger: 'blur'}
+                    {required: true,message: '请输入手机号',trigger: 'blur'},
+                    {
+                        validator: function(rule, value, callback) {
+                        if (/^1[34578]\d{9}$/.test(value) == false) {
+                            callback(new Error("手机号格式错误"));
+                        } else {
+                            callback();
+                        }
+                        },
+                        trigger: "blur"
+                    },
                 ],
                 email: [
                     {required: true,message: '请输入电子邮箱',trigger: 'blur'},
                     {type: 'email',message:'请输入正确的电子邮箱地址',trigger:['blur','change']}
                 ],
-                introduction: [
-                    {required: true,message: '请输入签名',trigger: 'blur'}
-                ],
-                location: [
-                    {required: true,message: '请输入地区',trigger: 'blur'}
-                ]                
+                // introduction: [
+                //     {required: true,message: '请输入签名',trigger: 'blur'}
+                // ],
+                // location: [
+                //     {required: true,message: '请输入地区',trigger: 'blur'}
+                // ]                
             }
         }
     },
     computed:{
         //计算当前搜索结果表里的数据
         data(){
-            return this.tableData.slice((this.currentPage - 1) * this.pageSize,this.currentPage * this.pageSize)
+            return this.tableData.slice((this.pageNum - 1) * this.pageSize,this.pageNum * this.pageSize)
         }
     },
     watch:{
+        
         //搜索框里面的内容发生变化的时候，搜索结果table列表的内容跟着它的内容发生变化
         select_word: function(){
+            //设置忽略大小写
+            // for(let i in tempData){
+            //     tempData[i].username.toUpperCase().includes(_this.message.toUpperCase());
+            // }
             if(this.select_word == ''){
                 this.tableData = this.tempData;
             }else{
@@ -225,41 +267,46 @@ export default {
     methods:{
         //获取当前页
         handleCurrentChange(val){
-            this.currentPage = val;
+            this.pageNum = val;
+            this.getData();
+        },
+        //获取当前页显示条数
+        handleSizeChange(val){
+            this.pageSize = val;
+            this.getData();
         },
         //查询所有用户
         getData(){
             this.tempData = [];
             this.tableData = [];
-            getAllConsumer().then(res => {
-                this.tempData = res;
-                this.tableData = res;
-                this.currentPage = 1;
+            var params = {pageSize:this.pageSize, pageNum:this.pageNum, username:this.username}            
+            getAllConsumer(params).then(res => {
+                this.tempData = res.data.records;
+                this.tableData = res.data.records;
+                this.total = res.data.total
             })
         },
         //添加用户
         addConsumer(){
             this.$refs['registerForm'].validate(valid =>{
                 if(valid){
-                    let d = this.registerForm.birth;
-                    let datetime = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
-                    let params = new URLSearchParams();
-                    params.append('username',this.registerForm.username);
-                    params.append('password',this.registerForm.password);
-                    params.append('sex',this.registerForm.sex);
-                    params.append('phoneNum',this.registerForm.phoneNum);            
-                    params.append('email',this.registerForm.email);
-                    params.append('birth',datetime);
-                    params.append('introduction',this.registerForm.introduction);
-                    params.append('location',this.registerForm.location);
-                    params.append('avator','/img/user.jpg');
-                    setConsumer(params)
+                    this.consumer.username = this.registerForm.username;
+                    this.consumer.password = this.registerForm.password;
+                    this.consumer.sex = this.registerForm.sex;
+                    this.consumer.phoneNum = this.registerForm.phoneNum;
+                    this.consumer.email = this.registerForm.email;
+                    this.consumer.birth = this.registerForm.birth;
+                    this.consumer.introduction = this.registerForm.introduction;
+                    this.consumer.location = this.registerForm.location;
+                    // this.consumer.avatar = '/img/user.jpg';
+                    var consumer1 = this.consumer;
+                    setConsumer(consumer1)
                     .then(res => {
                         if(res.code == 1){
                             this.getData();
-                            this.notify("添加成功","success");
+                            this.notify(res.message,"success");
                         }else{
-                            this.notify("添加失败","error");
+                            this.notify(res.message,"error");
                         }
                     })
                     .catch(err => {
@@ -289,26 +336,25 @@ export default {
         editSave(){
             this.$refs['form'].validate(valid =>{
                 if(valid){
-                    let d = new Date(this.form.birth);
-                    let datetime = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
-                    let params = new URLSearchParams();
-                    params.append('id',this.form.id);
-                    params.append('username',this.form.username);
-                    params.append('password',this.form.password);
-                    params.append('sex',this.form.sex);
-                    params.append('phoneNum',this.form.phoneNum);
-                    params.append('email',this.form.email);
-                    params.append('birth',datetime);
-                    params.append('introduction',this.form.introduction);
-                    params.append('location',this.form.location);
+                    this.consumer.id = this.form.id;
+                    this.consumer.username = this.form.username;
+                    this.consumer.password = this.form.password;
+                    this.consumer.sex = this.form.sex;
+                    this.consumer.phoneNum = this.form.phoneNum;
+                    this.consumer.email = this.form.email;
+                    this.consumer.birth = this.form.birth;
+                    this.consumer.introduction = this.form.introduction;
+                    this.consumer.location = this.form.location;
 
-                    updateConsumer(params)
+                    var consumer1 = this.consumer
+
+                    updateConsumer(consumer1)
                     .then(res => {
                         if(res.code == 1){
                             this.getData();
-                            this.notify("修改成功","success");
+                            this.notify(res.message,"success");
                         }else{
-                            this.notify("修改失败","error");
+                            this.notify(res.message,"error");
                         }
                     })
                     .catch(err => {
@@ -320,7 +366,7 @@ export default {
         },
         //更新图片
         uploadUrl(id){
-            return `${this.$store.state.HOST}/consumer/updateConsumerPic?id=${id}`
+            return `${this.$store.state.HOST}/consumer/updateConsumerAvatar?id=${id}`
         },
         //删除一名用户
         deleteRow(){
@@ -328,9 +374,9 @@ export default {
             .then(res => {
                 if(res){
                     this.getData();
-                    this.notify("删除成功","success");
+                    this.notify(res.message,"success");
                 }else{
-                    this.notify("删除失败","error");
+                    this.notify(res.message,"error");
                 }
             })
             .catch(err => {

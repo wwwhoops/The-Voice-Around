@@ -47,9 +47,9 @@ export default {
           if(res.code == 1){
             localStorage.setItem('userName',this.ruleForm.username);
             this.$router.push("/Info");
-            this.notify("登录成功","success");
+            this.notify(res.message,"success");
           }else{
-            this.notify("登录失败","error");
+            this.notify(res.message,"error");
           }
         });
     }

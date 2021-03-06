@@ -11,7 +11,7 @@
                     <i class="el-icon-rank"></i>
                 </el-tooltip>
             </div>
-            <div class="user-avator">
+            <div class="user-avatar">
                 <img src="../assets/img/user.jpg"/>
             </div>
             <el-dropdown class="user-name" trigger="click" @command="handleCommand">
@@ -120,11 +120,11 @@ export default {
     font-size: 24px;
 }
 
-.user-avator{
+.user-avatar{
     margin-left: 20px;
 }
 
-.user-avator img{
+.user-avatar img{
     display: block;
     width: 40px;
     height: 40px;

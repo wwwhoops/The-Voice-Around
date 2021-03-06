@@ -29,18 +29,22 @@ export const delSong = (id) => get(`song/deleteASong?id=${id}`);
 export const songOfSongId =(id) => get(`song/detail?songId=${id}`);
 //根据歌曲名获取歌曲对象
 export const songOfSongName =(songName) => get(`song/songOfSongName?songName=${songName}`);
-//查询所有歌曲
+//根据歌手id查询该歌手的所有歌曲
 export const allSong =(singerId) => get(`song/allSong?singerId=${singerId}`);
+//不带参数查询所有歌曲
+export const alltAllSongNoParams =() => get(`song/getAllSong`);
 
 //============歌单相关================
 //查询歌单
-export const getAllSongList =(params) => get(`songList/getAllSongList`,params);
+export const getAllSongListPage =(params) => get(`songList/getAllSongListPage`,params);
 //添加歌单
 export const setSongList = (songList) => post(`songList/addSongList`,songList);
 //编辑歌单
 export const updateSongList = (params) => post(`songList/updateSongList`,params);
 //删除歌单
 export const delSongList = (id) => get(`songList/deleteASongList?id=${id}`);
+//查询歌单
+export const getAllSongList =() => get(`songList/getAllSongList`);
 
 //============歌单的歌曲相关============
 //根据歌单id查询歌曲列表
@@ -52,15 +56,17 @@ export const delListSong = (songListId,songId) => get(`listSong/deleteASongFromS
 
 //============用户相关================
 //查询用户
-export const getAllConsumer =() => get(`consumer/allConsumer`);
+export const getAllConsumer =(params) => get(`consumer/allConsumerPage`, params);
+//不带参数查询所有用户
+export const getAllConsumerNoParams =() => get(`consumer/getAllConsumer`);
 //添加用户
-export const setConsumer = (params) => post(`consumer/add`,params);
+export const setConsumer = (consumer) => post(`consumer/addConsumer`,consumer);
 //编辑用户
-export const updateConsumer = (params) => post(`consumer/update`,params);
+export const updateConsumer = (consumer) => post(`consumer/updateConsumerInfo`,consumer);
 //删除用户
-export const delConsumer = (id) => get(`consumer/delete?id=${id}`);
+export const delConsumer = (id) => get(`consumer/deleteAConsumer?id=${id}`);
 //根据用户id查询该用户的详细信息
-export const getUserOfId =(id) => get(`/consumer/selectByPrimaryKey?id=${id}`);
+export const getUserOfId =(id) => get(`/consumer/selectInfoById?id=${id}`);
 
 //===============收藏===================
 //指定用户的收藏列表

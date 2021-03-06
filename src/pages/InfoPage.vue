@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-row :gutter="20" class="mgb20">
+        <el-row :gutter="20" class="mgb20" style="margin-top: 15px">
             <el-col :span="6">
                 <el-card>
                     <div class="grid-content">
@@ -73,7 +73,7 @@
     </div>
 </template>
 <script>
-import {getAllConsumer,allSong,getAllSingerPage,getAllSongList} from '../api/index';
+import {getAllConsumerNoParams,alltAllSongNoParams,allSinger,getAllSongList} from '../api/index';
 export default {
     data(){
         return {
@@ -132,7 +132,7 @@ export default {
         }
     },
     created() {
-
+        
     },
     mounted() {
         this.getConsumer();
@@ -141,10 +141,11 @@ export default {
         this.getSongList();
     },
     methods: {
-        getConsumer() {                     //用户总数
-            getAllConsumer().then(res => {
-                this.consumer = res;
-                this.consumerCount = res.length;
+        getConsumer() {              //用户总数
+            getAllConsumerNoParams().then(res => {
+                this.consumer = res.data
+                this.consumerCount = res.total
+                console.log(this.consumerCount,'this.consumerCount')
                 this.consumerSex.rows[0]['总数'] = this.setSex(1,this.consumer);
                 this.consumerSex.rows[1]['总数'] = this.setSex(0,this.consumer);
             })
@@ -159,13 +160,13 @@ export default {
             return count;
         },
         getSong() {                      //歌曲总数
-            allSong().then(res => {
-                this.songCount = res.length;
+            alltAllSongNoParams().then(res => {
+                this.songCount = res.total;
             })
         },
         getSinger() {                      //歌手数量
-            getAllSingerPage().then(res => {
-                this.singerCount = res.length;
+            allSinger().then(res => {
+                this.singerCount = res.total;
                 this.singerSex.rows[0]['总数'] = this.setSex(0,res);
                 this.singerSex.rows[1]['总数'] = this.setSex(1,res);
                 this.singerSex.rows[2]['总数'] = this.setSex(2,res);
@@ -178,7 +179,7 @@ export default {
 
         getSongList() {                    //歌单数量
             getAllSongList().then(res => {
-                this.songListCount = res.length;
+                this.songListCount = res.total;
                 for(let item of res){
                     this.getByStyle(item.style);
                 }

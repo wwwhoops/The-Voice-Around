@@ -20,8 +20,8 @@
                     <div class="songList-img">
                         <img :src="getUrl(scope.row.pic)" style="width:100%"/>
                     </div>
-                    <el-upload :action="uploadUrl(scope.row.id)" :before-upload="beforeAvatorUpload" 
-                        :on-success="handleAvatorSuccess">
+                    <el-upload :action="uploadUrl(scope.row.id)" :before-upload="beforeAvatarUpload" 
+                        :on-success="handleAvatarSuccess">
                         <el-button size="mini">更新图片</el-button>
                     </el-upload>
                 </template>
@@ -112,7 +112,7 @@
 </template>
 
 <script>
-import {getAllSongList,setSongList,updateSongList,delSongList} from '../api/index';
+import {getAllSongListPage,setSongList,updateSongList,delSongList} from '../api/index';
 import { mixin } from '../mixins/index';
 export default {
     mixins: [mixin],
@@ -185,7 +185,7 @@ export default {
             this.tempData = [];
             this.tableData = [];
             var params = {pageSize:this.pageSize, pageNum:this.pageNum, title:this.title}
-            getAllSongList(params).then(res => {
+            getAllSongListPage(params).then(res => {
                 this.tempData = res.data.records;
                 this.tableData = res.data.records;
                 this.total = res.data.total

@@ -20,8 +20,8 @@
                     <div class="singer-img">
                         <img :src="getUrl(scope.row.pic)" style="width:100%"/>
                     </div>
-                    <el-upload :action="uploadUrl(scope.row.id)" :before-upload="beforeAvatorUpload" 
-                        :on-success="handleAvatorSuccess">
+                    <el-upload :action="uploadUrl(scope.row.id)" :before-upload="beforeAvatarUpload" 
+                        :on-success="handleAvatarSuccess">
                         <el-button size="mini">更改图片</el-button>
                     </el-upload>
                 </template>
@@ -235,7 +235,6 @@ export default {
         },
         //添加歌手
         addSinger(){
-            let datetime = this.registerForm.birth;
             // let params = new URLSearchParams();
             // params.append('name',this.registerForm.name);
             // params.append('sex',this.registerForm.sex);
@@ -244,8 +243,8 @@ export default {
             // params.append('introduction',this.registerForm.introduction);
             this.singer.name = this.registerForm.name;
             this.singer.sex = this.registerForm.sex;
-            this.singer.pic = '/img/singerPic/defaultSingerImg.jpg'; //添加歌手时设置默认图片
-            this.singer.birth = datetime;
+            // this.singer.pic = '/img/singerPic/defaultSingerImg.jpg'; //添加歌手时设置默认图片
+            this.singer.birth = this.registerForm.birth;
             this.singer.location = this.registerForm.location;
             this.singer.introduction = this.registerForm.introduction;
             var singer1 = this.singer
