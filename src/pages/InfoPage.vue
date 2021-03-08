@@ -82,6 +82,9 @@ export default {
             singerCount: 0,         //歌手数量
             songListCount: 0,        //歌单数量
             consumer: [],            //所有用户
+            songList: [],           //歌单数据
+            singer: [],             //歌手数据
+            otherCountrySingers: 0,
             consumerSex:{           //按性别分类的用户数
                 columns: ['性别','总数'],
                 rows: [
@@ -102,9 +105,10 @@ export default {
                     {'风格': '粤语','总数': 0},
                     {'风格': '欧美','总数': 0},
                     {'风格': '日韩','总数': 0},
-                    {'风格': 'BGM','总数': 0},
+                    {'风格': '摇滚','总数': 0},
                     {'风格': '轻音乐','总数': 0},
-                    {'风格': '乐器','总数': 0}
+                    {'风格': '流行','总数': 0},
+                    {'风格': '其他','总数': 0}
                 ]
             },
             singerSex:{           //按性别分类的歌手数
@@ -124,9 +128,8 @@ export default {
                     {'国籍': '日本','总数': 0},
                     {'国籍': '美国','总数': 0},
                     {'国籍': '新加坡','总数': 0},
-                    {'国籍': '意大利','总数': 0},
-                    {'国籍': '马来西亚','总数': 0},
-                    {'国籍': '西班牙','总数': 0}                    
+                    {'国籍': '法国','总数': 0},
+                    {'国籍': '其他','总数': this.otherCountrySingers}                    
                 ]
             }
         }
@@ -145,7 +148,6 @@ export default {
             getAllConsumerNoParams().then(res => {
                 this.consumer = res.data
                 this.consumerCount = res.total
-                console.log(this.consumerCount,'this.consumerCount')
                 this.consumerSex.rows[0]['总数'] = this.setSex(1,this.consumer);
                 this.consumerSex.rows[1]['总数'] = this.setSex(0,this.consumer);
             })
@@ -166,12 +168,13 @@ export default {
         },
         getSinger() {                      //歌手数量
             allSinger().then(res => {
+                this.singer = res.data
                 this.singerCount = res.total;
-                this.singerSex.rows[0]['总数'] = this.setSex(0,res);
-                this.singerSex.rows[1]['总数'] = this.setSex(1,res);
-                this.singerSex.rows[2]['总数'] = this.setSex(2,res);
-                this.singerSex.rows[3]['总数'] = this.setSex(3,res);
-                for(let item of res){
+                this.singerSex.rows[0]['总数'] = this.setSex(0,this.singer);
+                this.singerSex.rows[1]['总数'] = this.setSex(1,this.singer);
+                this.singerSex.rows[2]['总数'] = this.setSex(2,this.singer);
+                this.singerSex.rows[3]['总数'] = this.setSex(3,this.singer);
+                for(let item of res.data){
                     this.getByCountry(item.location);
                 }
             })
@@ -180,14 +183,19 @@ export default {
         getSongList() {                    //歌单数量
             getAllSongList().then(res => {
                 this.songListCount = res.total;
-                for(let item of res){
+                this.songList = res.data;
+                for(let item of this.songList){
                     this.getByStyle(item.style);
                 }
             })
         },  
         getByStyle(style) {              //根据歌单风格获取数量
+            // var styleList = style.split(',')
             for(let item of this.songStyle.rows){
                 if(style.includes(item['风格'])){
+                    item['总数']++;
+                }
+                if(style.includes(item['其他'])){
                     item['总数']++;
                 }
             }
@@ -196,7 +204,12 @@ export default {
             for(let item of this.country.rows){
                 if(location.includes(item['国籍'])){
                     item['总数']++;
+                }else{
+                    this.otherCountrySingers++;
                 }
+                // if(location.includes(item['其他'])){
+                //     item['总数']++;
+                // }
             }
         }
     }

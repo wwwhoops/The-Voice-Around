@@ -135,6 +135,15 @@
                 <el-button size="mini" @click="deleteRow">确定</el-button>                
             </span>
         </el-dialog>
+
+        <!-- 切换页面歌曲暂停弹框 -->
+        <el-dialog title="暂停歌曲？" :visible.sync="pauseVisible" width="300px" center>
+            <div align="center">是否暂停当前播放歌曲？</div>
+            <span slot="footer">
+                <el-button size="mini" @click="pauseVisible = false" type="danger">继续播放</el-button>
+                <el-button size="mini" @click="deleteRow" type="danger">停止播放</el-button>                
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -153,6 +162,7 @@ export default {
             centerDialogVisible: false, //添加弹窗是否显示
             editVisible: false,         //编辑弹窗是否显示
             delVisible: false,          //删除弹窗是否显示
+            pauseVisible: false,          //切换页面弹窗是否显示
             registerForm:{      //添加框
                 name: '',
                 singerName: '',                
@@ -208,6 +218,7 @@ export default {
         this.getData();
     },
     destroyed() {
+        this.pauseVisible=true;
         this.$store.commit('setIsPlay',false);
     },
     methods:{

@@ -91,7 +91,16 @@
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item prop="location" label="地区" size="mini">
-                    <el-input v-model="registerForm.location" placeholder="地区"></el-input>
+                    <el-input v-model="registerForm.location" placeholder="国籍-省(市州)"></el-input>
+                    <!-- <v-distpicker @selected="regionSelect" hide-area></v-distpicker> -->
+                    <!-- <el-select  placeholder="请选择国籍" filterable style="width: 77.9%" v-model="FormInput.nation">
+                        <el-option-group v-for="group in country":key="group.label" :label="group.label">
+                            <el-option v-for="item in group.options" :key="item.value" :label="item.label" :value="item.label">
+                                <span style="float: left">{{ item.label }}</span>
+                                <span style="float: right; color: #8492a6; font-size: 13px">{{ item.value }}</span>
+                            </el-option>
+                        </el-option-group>
+                    </el-select> -->
                 </el-form-item>
                 <el-form-item prop="introduction" label="简介" size="mini">
                     <el-input v-model="registerForm.introduction" placeholder="简介" type="textarea"></el-input>
@@ -127,7 +136,7 @@
                         </el-date-picker>
                 </el-form-item>
                 <el-form-item prop="location" label="地区" size="mini">
-                    <el-input v-model="form.location" placeholder="地区"></el-input>
+                    <el-input v-model="form.location" placeholder="国籍-省(市州)"></el-input>
                 </el-form-item>
                 <el-form-item prop="introduction" label="简介" size="mini">
                     <el-input v-model="form.introduction" placeholder="简介" type="textarea"></el-input>
@@ -151,8 +160,12 @@
 
 <script>
 import {setSinger, getAllSingerPage,updateSinger,delSinger} from '../api/index';
+import VDistpicker from "v-distpicker";
 import { mixin } from '../mixins/index';
 export default {
+    components: {
+        "v-distpicker":VDistpicker
+    },
     mixins: [mixin],
     data(){
         return{

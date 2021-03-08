@@ -74,7 +74,12 @@
                     <el-input v-model="registerForm.introduction" placeholder="简介" type="textarea"></el-input>
                 </el-form-item>
                 <el-form-item prop="style" label="风格" size="mini">
-                    <el-input v-model="registerForm.style" placeholder="风格"></el-input>
+                    <!-- <el-input v-model="registerForm.style" placeholder="风格"></el-input> -->
+                    <el-checkbox-group v-model="checkedStyles"  @change="handleCheckedCitiesChange1"
+                        :min="1"
+                        :max="3">
+                        <el-checkbox v-for="it in styles" :label="it" :key="it">{{it}}</el-checkbox>
+                    </el-checkbox-group>
                 </el-form-item>
             </el-form>
             <span slot="footer">
@@ -92,7 +97,11 @@
                     <el-input v-model="form.introduction" placeholder="简介" type="textarea"></el-input>
                 </el-form-item>    
                 <el-form-item prop="style" label="风格" size="mini">
-                    <el-input v-model="form.style" placeholder="风格"></el-input>
+                    <el-checkbox-group v-model="form.style"  @change="handleCheckedCitiesChange"
+                        :min="1"
+                        :max="3">
+                        <el-checkbox v-for="it in styles" :label="it" :key="it">{{it}}</el-checkbox>
+                    </el-checkbox-group>
                 </el-form-item>
             </el-form>
             <span slot="footer">
@@ -118,6 +127,8 @@ export default {
     mixins: [mixin],
     data(){
         return{
+            checkedStyles: ['流行', '华语'], //默认歌单风格
+            styles: ['华语', '粤语', '欧美', '日韩', '摇滚', '轻音乐', '流行', '其他'], //所有歌单风格
             centerDialogVisible: false, //添加弹窗是否显示
             editVisible: false,         //编辑弹窗是否显示
             delVisible: false,          //删除弹窗是否显示
@@ -130,7 +141,7 @@ export default {
                 id: '',
                 title: '',
                 introduction: '',
-                style: ''
+                style: '',
             },
             tableData: [],
             tempData: [],
@@ -196,7 +207,7 @@ export default {
             this.songList.title = this.registerForm.title;
             this.songList.pic = '/img/songListPic/defaultSongListImg.jpg'; //添加歌单时设置默认图片
             this.songList.introduction = this.registerForm.introduction;
-            this.songList.style = this.registerForm.style;
+            this.songList.style = this.registerForm.style.join(",");
             var songList1 = this.songList
             setSongList(songList1)
             .then(res => {
@@ -219,7 +230,7 @@ export default {
                 id: row.id,
                 title: row.title,
                 introduction: row.introduction,
-                style: row.style
+                style: row.style.split(',') //转换成数组
             }
         },
         //保存编辑页面修改的数据
@@ -227,9 +238,8 @@ export default {
             this.songList.id = this.form.id
             this.songList.title = this.form.title;
             this.songList.introduction = this.form.introduction;
-            this.songList.style = this.form.style;
+            this.songList.style = this.form.style.join(","); //转换成字符串
             var songList1 = this.songList
-
             updateSongList(songList1)
             .then(res => {
                 if(res.code == 1){
@@ -271,7 +281,13 @@ export default {
         //转向该歌单的评论列表
         getComment(id,title){
             this.$router.push({path: '/commentPage',query:{id,title}})
-        }
+        },
+        handleCheckedCitiesChange(value){
+            this.form.style=value
+        },
+        handleCheckedCitiesChange1(value){
+            this.registerForm.style=value
+        },
     }
 }
 </script>
