@@ -1,17 +1,19 @@
 <template>
     <div class="table">
         <div class="crumbs">
-            <i class="el-icon-tickets"></i>收藏信息
+            <i class="el-icon-tickets" style="font-size: 18px; padding-top: 18px">{{this.consumerName}}-收藏列表</i>
         </div>
         <div class="container">
             <div class="handle-box">
-                <el-button type="primary" size="mini" @click="delAll">批量删除</el-button>
-                <el-input v-model="select_word" size="mini" placeholder="筛选关键词" class="handle-input"></el-input>
+                快速搜索：
+                <el-input v-model="select_word" size="mini" placeholder="请输入歌曲名" class="handle-input"></el-input>
+                <el-button type="primary" size="mini" @click="delBatch">批量删除</el-button>
             </div>
         </div>
         <el-table size="mini" ref="multipleTable" border style="width:100%" height="680px" :data="tableData" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="40"></el-table-column>            
-            <el-table-column prop="name" label="歌手-歌名" align="center"></el-table-column>            
+            <el-table-column prop="songName" label="歌名" align="center"></el-table-column>  
+            <el-table-column prop="singerName" label="歌手" align="center"></el-table-column>            
             <el-table-column label="操作" width="150" align="center">
                 <template slot-scope="scope">
                     <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button> 
@@ -31,7 +33,7 @@
 
 <script>
 import { mixin } from '../mixins/index';
-import {songOfSongId,getCollectOfUserId,deleteCollection} from '../api/index';
+import {songOfSongIdAlias,getCollectOfUserId,deleteCollection} from '../api/index';
 
 export default {
     mixins: [mixin],
@@ -42,8 +44,11 @@ export default {
             tableData: [],
             tempData: [],
             select_word: '',
+            songName: '',   //搜索框
             idx: -1,          //当前选择项
             multipleSelection: [],   //哪些项已经打勾
+            consumerName: '',        //用户管理页面传过来的用户名
+            consumerId: null,           //用户管理页面传过来的用户id
         }
     },
     watch:{
@@ -54,7 +59,7 @@ export default {
             }else{
                 this.tableData = [];
                 for(let item of this.tempData){
-                    if(item.name.includes(this.select_word)){
+                    if(item.songName.includes(this.select_word) || item.singerName.includes(this.select_word)){
                         this.tableData.push(item);
                     }
                 }
@@ -62,6 +67,8 @@ export default {
         }
     },
     created(){
+        this.consumerName = this.$route.query.name;
+        this.consumerId = this.$route.query.id;
         this.getData();
     },
     methods:{
@@ -69,18 +76,20 @@ export default {
         getData(){
             this.tempData = [];
             this.tableData = [];
-            getCollectOfUserId(this.$route.query.id).then(res => {
-                for(let item of res){
+            getCollectOfUserId(this.consumerId).then(res => {
+                for(let item of res.data){
                     this.getSong(item.songId);
                 }
             })
         },
         //根据歌曲id查询歌曲对象，放到tempData和tableData里面
-        getSong(id){
-            songOfSongId(id)
+        getSong(songId){
+            songOfSongIdAlias(songId)
             .then(res => {
-                this.tempData.push(res);
-                this.tableData.push(res);
+                for(let i of res.data){
+                    this.tempData.push(i);
+                    this.tableData.push(i);
+                }
             })
             .catch(err => {
                 console.log(err);
@@ -88,13 +97,13 @@ export default {
         },
         //删除一条歌曲
         deleteRow(){
-            deleteCollection(this.$route.query.id,this.idx.id)
+            deleteCollection(this.consumerId,this.idx.songId)
             .then(res => {
-                if(res){
+                if(res.code == 1){
                     this.getData();
-                    this.notify("删除成功","success");
+                    this.notify(res.message,"success");
                 }else{
-                    this.notify("删除失败","error");
+                    this.notify(res.message,"error");
                 }
             })
             .catch(err => {
@@ -103,7 +112,7 @@ export default {
             this.delVisible = false;
         },
         //批量删除已经选择的项
-        delAll(){
+        delBatch(){
             for(let item of this.multipleSelection){
                 this.handleDelete(item);
                 this.deleteRow();

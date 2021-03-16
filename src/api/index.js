@@ -26,7 +26,9 @@ export const updateSong = (song) => post(`song/updateSongInfo`,song);
 //删除歌曲
 export const delSong = (id) => get(`song/deleteASong?id=${id}`);
 //根据歌曲id查询歌曲对象
-export const songOfSongId =(id) => get(`song/detail?songId=${id}`);
+export const songOfSongId =(id) => get(`song/getASongBySongId?songId=${id}`);
+//根据歌曲id查询歌曲、歌手信息，带别名
+export const songOfSongIdAlias =(songId) => get(`song/getASongBySongIdAlias?songId=${songId}`);
 //根据歌曲名获取歌曲对象
 export const songOfSongName =(songName) => get(`song/songOfSongName?songName=${songName}`);
 //根据歌手id查询该歌手的所有歌曲
@@ -70,13 +72,13 @@ export const getUserOfId =(id) => get(`/consumer/selectInfoById?id=${id}`);
 
 //===============收藏===================
 //指定用户的收藏列表
-export const getCollectOfUserId = (userId) => get(`/collect/collectOfUserId?userId=${userId}`);
+export const getCollectOfUserId = (userId) => get(`/collect/getCollectByUserId?userId=${userId}`);
 //删除用户收藏的歌曲
-export const deleteCollection = (userId,songId) => get(`collect/delete?userId=${userId}&songId=${songId}`);
+export const deleteCollection = (userId,songId) => get(`collect/deleteACollect?userId=${userId}&songId=${songId}`);
 
 //===============评论===================
 //指定歌单的评论列表
-export const getCommentOfSongListId = (songListId) => get(`/comment/commentOfSongListId?songListId=${songListId}`);
+export const getCommentOfSongListId = (songListId) => get(`/comment/getCommentBySongListId?songListId=${songListId}`);
 //删除评论
-export const deleteComment = (id) => get(`comment/delete?id=${id}`);
+export const deleteComment = (commentId) => get(`comment/deleteAComment?commentId=${commentId}`);
 

@@ -1,18 +1,20 @@
 <template>
     <div class="table">
         <div class="crumbs">
-            <i class="el-icon-tickets"></i>评论信息
+            <i class="el-icon-tickets" style="font-size: 18px; padding-top: 18px">{{this.listTitle}}-评论列表</i>
         </div>
         <div class="container">
             <div class="handle-box">
-                <el-button type="primary" size="mini" @click="delAll">批量删除</el-button>
-                <el-input v-model="select_word" size="mini" placeholder="筛选关键词" class="handle-input"></el-input>
+                快速搜索：
+                <el-input v-model="select_word" size="mini" placeholder="请输入歌曲名" class="handle-input"></el-input>
+                <el-button type="primary" size="mini" @click="delBatch">批量删除</el-button>
             </div>
         </div>
         <el-table size="mini" ref="multipleTable" border style="width:100%" height="680px" :data="tableData" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="40"></el-table-column>            
-            <el-table-column prop="name" label="用户名" align="center"></el-table-column>   
-            <el-table-column prop="content" label="评论内容" align="center"></el-table-column>           
+            <el-table-column prop="username" label="用户名" align="center"></el-table-column>   
+            <el-table-column prop="content" label="评论内容" align="center"></el-table-column>
+            <el-table-column prop="createTime" label="评论时间" align="center"></el-table-column>              
             <el-table-column label="操作" width="150" align="center">
                 <template slot-scope="scope">
                     <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button> 
@@ -44,6 +46,8 @@ export default {
             tempData: [],
             select_word: '',
             idx: -1,          //当前选择项
+            listId: null,      //歌单页面穿过来的歌单ID
+            listTitle: '',     //歌单页面穿过来的歌单title
             multipleSelection: [],   //哪些项已经打勾
         }
     },
@@ -55,7 +59,7 @@ export default {
             }else{
                 this.tableData = [];
                 for(let item of this.tempData){
-                    if(item.name.includes(this.select_word)){
+                    if(item.username.includes(this.select_word) || item.content.includes(this.select_word)){
                         this.tableData.push(item);
                     }
                 }
@@ -63,6 +67,8 @@ export default {
         }
     },
     created(){
+        this.listId = this.$route.query.id;
+        this.listTitle = this.$route.query.title;
         this.getData();
     },
     methods:{
@@ -70,34 +76,35 @@ export default {
         getData(){
             this.tempData = [];
             this.tableData = [];
-            getCommentOfSongListId(this.$route.query.id).then(res => {
-                for(let item of res){
-                    this.getUsers(item.userId,item);
+            getCommentOfSongListId(this.listId).then(res => {
+                for(let item of res.data){
+                    this.tempData.push(item);
+                    this.tableData.push(item);
                 }
             })
         },
-        //获取用户名，连同本对象放到tempData和tableData里面
-        getUsers(id,item){
-            getUserOfId(id)
-            .then(res => {
-                let o = item;
-                o.name = res.username;
-                this.tempData.push(o);
-                this.tableData.push(o);
-            })
-            .catch(err => {
-                console.log(err);
-            });
-        },
+        // //获取用户名，连同本对象放到tempData和tableData里面
+        // getUsers(id,item){
+        //     getUserOfId(id)
+        //     .then(res => {
+        //         let o = item;
+        //         o.name = res.username;
+        //         this.tempData.push(o);
+        //         this.tableData.push(o);
+        //     })
+        //     .catch(err => {
+        //         console.log(err);
+        //     });
+        // },
         //删除一条评论
         deleteRow(){
-            deleteComment(this.idx.id)
+            deleteComment(this.idx.commentId)
             .then(res => {
-                if(res){
+                if(res.code == 1){
                     this.getData();
-                    this.notify("删除成功","success");
+                    this.notify(res.message,"success");
                 }else{
-                    this.notify("删除失败","error");
+                    this.notify(res.message,"error");
                 }
             })
             .catch(err => {
@@ -106,7 +113,7 @@ export default {
             this.delVisible = false;
         },
         //批量删除已经选择的项
-        delAll(){
+        delBatch(){
             for(let item of this.multipleSelection){
                 this.handleDelete(item);
                 this.deleteRow();

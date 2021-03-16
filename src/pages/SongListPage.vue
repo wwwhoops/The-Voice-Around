@@ -279,8 +279,8 @@ export default {
             this.$router.push({path:`/ListSong`,query:{id,title}});
         },
         //转向该歌单的评论列表
-        getComment(id,title){
-            this.$router.push({path: '/commentPage',query:{id,title}})
+        getComment(id, title){
+            this.$router.push({path: '/Comment',query:{id,title}})
         },
         handleCheckedCitiesChange(value){
             this.form.style=value

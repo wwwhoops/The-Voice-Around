@@ -74,7 +74,9 @@
 </template>
 <script>
 import {getAllConsumerNoParams,alltAllSongNoParams,allSinger,getAllSongList} from '../api/index';
+let otherCountrySingers = 5;
 export default {
+    
     data(){
         return {
             consumerCount: 0,       //用户总数
@@ -84,7 +86,7 @@ export default {
             consumer: [],            //所有用户
             songList: [],           //歌单数据
             singer: [],             //歌手数据
-            otherCountrySingers: 0,
+            otherCountrySingers: 0,  //其他国家歌手数
             consumerSex:{           //按性别分类的用户数
                 columns: ['性别','总数'],
                 rows: [
@@ -129,7 +131,7 @@ export default {
                     {'国籍': '美国','总数': 0},
                     {'国籍': '新加坡','总数': 0},
                     {'国籍': '法国','总数': 0},
-                    {'国籍': '其他','总数': this.otherCountrySingers}                    
+                    {'国籍': '其他','总数': otherCountrySingers}                    
                 ]
             }
         }
@@ -176,7 +178,7 @@ export default {
                 this.singerSex.rows[3]['总数'] = this.setSex(3,this.singer);
                 for(let item of res.data){
                     this.getByCountry(item.location);
-                }
+                }                
             })
         },
 
@@ -205,7 +207,7 @@ export default {
                 if(location.includes(item['国籍'])){
                     item['总数']++;
                 }else{
-                    this.otherCountrySingers++;
+                    // otherCountrySingers++;
                 }
                 // if(location.includes(item['其他'])){
                 //     item['总数']++;
