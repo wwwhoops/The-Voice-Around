@@ -128,7 +128,7 @@ export default {
     data(){
         return{
             checkedStyles: ['流行', '华语'], //默认歌单风格
-            styles: ['华语', '粤语', '欧美', '日韩', '摇滚', '轻音乐', '流行', '其他'], //所有歌单风格
+            styles: ['华语', '粤语', '欧美', '日韩', '摇滚', '民谣', '流行', '其他'], //所有歌单风格
             centerDialogVisible: false, //添加弹窗是否显示
             editVisible: false,         //编辑弹窗是否显示
             delVisible: false,          //删除弹窗是否显示

@@ -74,7 +74,6 @@
 </template>
 <script>
 import {getAllConsumerNoParams,alltAllSongNoParams,allSinger,getAllSongList} from '../api/index';
-let otherCountrySingers = 5;
 export default {
     
     data(){
@@ -86,7 +85,7 @@ export default {
             consumer: [],            //所有用户
             songList: [],           //歌单数据
             singer: [],             //歌手数据
-            otherCountrySingers: 0,  //其他国家歌手数
+            // otherCountrySingers: 1,  //其他国家歌手数
             consumerSex:{           //按性别分类的用户数
                 columns: ['性别','总数'],
                 rows: [
@@ -108,7 +107,7 @@ export default {
                     {'风格': '欧美','总数': 0},
                     {'风格': '日韩','总数': 0},
                     {'风格': '摇滚','总数': 0},
-                    {'风格': '轻音乐','总数': 0},
+                    {'风格': '民谣','总数': 0},
                     {'风格': '流行','总数': 0},
                     {'风格': '其他','总数': 0}
                 ]
@@ -129,20 +128,20 @@ export default {
                     {'国籍': '韩国','总数': 0},
                     {'国籍': '日本','总数': 0},
                     {'国籍': '美国','总数': 0},
-                    {'国籍': '新加坡','总数': 0},
+                    {'国籍': '英国','总数': 0},
                     {'国籍': '法国','总数': 0},
-                    {'国籍': '其他','总数': otherCountrySingers}                    
+                    // {'国籍': '其他','总数': 0}                    
                 ]
-            }
+            },
         }
     },
     created() {
-        
+       this.getSinger();
+
     },
     mounted() {
         this.getConsumer();
         this.getSong();
-        this.getSinger();
         this.getSongList();
     },
     methods: {
@@ -176,9 +175,9 @@ export default {
                 this.singerSex.rows[1]['总数'] = this.setSex(1,this.singer);
                 this.singerSex.rows[2]['总数'] = this.setSex(2,this.singer);
                 this.singerSex.rows[3]['总数'] = this.setSex(3,this.singer);
-                for(let item of res.data){
-                    this.getByCountry(item.location);
-                }                
+               
+                this.getByCountry(res.data);
+                              
             })
         },
 
@@ -202,17 +201,27 @@ export default {
                 }
             }
         },
-        getByCountry(location) {              //根据国籍获取数量
-            for(let item of this.country.rows){
-                if(location.includes(item['国籍'])){
-                    item['总数']++;
-                }else{
-                    // otherCountrySingers++;
-                }
-                // if(location.includes(item['其他'])){
-                //     item['总数']++;
-                // }
-            }
+        getByCountry(data) {              //根据国籍获取数量
+                let a=0
+                data.map(it=>{
+                   this.country.rows.map(itt=>{
+                        if(it.location.includes(itt['国籍'])){
+                            itt['总数']++
+                        }else{
+                          
+                        }
+                    })
+                })
+                var array=this.country.rows.map(it=>{
+                    return it['总数']
+                })
+                console.log(array)
+                var sum = array.reduce(function(pre, cur, index, array) {
+                    return pre+cur;
+                });
+                a=data.length-sum
+                this.country.rows.push( {'国籍': '其他','总数': a},)
+               
         }
     }
 }
