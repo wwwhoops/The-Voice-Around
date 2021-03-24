@@ -101,7 +101,8 @@
                     <el-input v-model="registerForm.introduction" placeholder="签名"></el-input>
                 </el-form-item>      
                 <el-form-item prop="location" label="地区" size="mini">
-                    <el-input v-model="registerForm.location" placeholder="地区"></el-input>
+                    <!-- <el-input v-model="registerForm.location" placeholder="地区"></el-input> -->
+                     <v-distpicker @selected="regionSelectOfInsert" hide-area></v-distpicker>
                 </el-form-item>          
             </el-form>
             <span slot="footer">
@@ -142,7 +143,8 @@
                     <el-input v-model="form.introduction" placeholder="签名"></el-input>
                 </el-form-item>      
                 <el-form-item prop="location" label="地区" size="mini">
-                    <el-input v-model="form.location" placeholder="地区"></el-input>
+                    <!-- <el-input v-model="form.location" placeholder="地区"></el-input> -->
+                    <v-distpicker @selected="regionSelectOfUpdate" hide-area></v-distpicker>
                 </el-form-item> 
             </el-form>
             <span slot="footer">
@@ -164,7 +166,11 @@
 <script>
 import {getAllConsumer,setConsumer,updateConsumer,delConsumer} from '../api/index';
 import { mixin } from '../mixins/index';
+import VDistpicker from "v-distpicker";
 export default {
+    components: {
+        "v-distpicker":VDistpicker
+    },
     mixins: [mixin],
     data(){
         return{
@@ -265,6 +271,17 @@ export default {
         this.getData();
     },
     methods:{
+        //地区选择方法
+        regionSelectOfInsert(data){
+            var country = data.province.value
+            var city = data.city.value 
+            this.registerForm.location = country + city
+        },
+        regionSelectOfUpdate(data){
+            var country = data.province.value
+            var city = data.city.value 
+            this.form.location = country + city
+        },
         //获取当前页
         handleCurrentChange(val){
             this.pageNum = val;
