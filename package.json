@@ -13,7 +13,9 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "default-passive-events": "^2.0.0",
     "echarts": "^4.9.0",
+    "element-china-area-data": "^5.0.2",
     "element-ui": "^2.15.0",
     "v-charts": "^1.19.0",
     "v-distpicker": "^1.2.9",

@@ -102,7 +102,7 @@
                 </el-form-item>      
                 <el-form-item prop="location" label="地区" size="mini">
                     <!-- <el-input v-model="registerForm.location" placeholder="地区"></el-input> -->
-                     <v-distpicker @selected="regionSelectOfInsert" hide-area></v-distpicker>
+                     <v-distpicker @selected="regionSelectOfInsert"></v-distpicker>
                 </el-form-item>          
             </el-form>
             <span slot="footer">
@@ -144,7 +144,7 @@
                 </el-form-item>      
                 <el-form-item prop="location" label="地区" size="mini">
                     <!-- <el-input v-model="form.location" placeholder="地区"></el-input> -->
-                    <v-distpicker @selected="regionSelectOfUpdate" hide-area></v-distpicker>
+                    <v-distpicker @selected="regionSelectOfUpdate"></v-distpicker>
                 </el-form-item> 
             </el-form>
             <span slot="footer">
@@ -275,12 +275,14 @@ export default {
         regionSelectOfInsert(data){
             var country = data.province.value
             var city = data.city.value 
-            this.registerForm.location = country + city
+            var area = data.area.value
+            this.registerForm.location = country + city + area
         },
         regionSelectOfUpdate(data){
             var country = data.province.value
             var city = data.city.value 
-            this.form.location = country + city
+            var area = data.area.value
+            this.form.location = country + city + area
         },
         //获取当前页
         handleCurrentChange(val){

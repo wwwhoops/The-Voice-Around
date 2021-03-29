@@ -40,7 +40,8 @@
             </el-table-column>
             <el-table-column label="评论" width="80" align="center">
                 <template slot-scope="scope">
-                    <el-button size="mini" @click="getComment(data[scope.$index].id, data[scope.$index].title)">评论</el-button>
+                    <!-- <el-button size="mini" @click="getComment(data[scope.$index].id, data[scope.$index].title)">评论</el-button> -->
+                    <el-button size="mini" @click="getComment(scope.row.id, scope.row.title)">评论</el-button>
                 </template>    
             </el-table-column>  
             <el-table-column label="操作" width="150" align="center">

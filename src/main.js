@@ -9,6 +9,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import './assets/css/main.css'
 import 'babel-polyfill'
 import VCharts from 'v-charts'
+import 'default-passive-events'
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
