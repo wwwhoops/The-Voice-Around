@@ -59,7 +59,7 @@ export default {
 
 <style scoped>
 .login-wrap {
-  position: relative;
+  /* position: relative; */
   background: url("../assets/img/background-test.jpg");
   background-attachment: fixed;
   background-position: center;
