@@ -21,6 +21,8 @@ export const delSinger = (id) => get(`singer/deleteASinger?id=${id}`);
 export const songOfSingerId =(params) => get(`song/singerSongPage`, params);
 // //根据歌手id查询该歌手的全部歌曲
 // export const songOfSingerId =(params) => get(`song/singerSongPage`, params);
+//添加歌曲
+export const addASong = (song) => post(`song/addASong`,song);
 //编辑歌曲
 export const updateSong = (song) => post(`song/updateSongInfo`,song);
 //删除歌曲

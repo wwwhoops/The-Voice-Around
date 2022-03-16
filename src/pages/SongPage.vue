@@ -99,6 +99,17 @@
                     <el-input v-model="registerForm.lyric" type="textarea" name="lyric"></el-input>
                 </div>
                 <div>
+                    <label>风格</label>
+                    <el-select v-model="songStyle" multiple :multiple-limit=3 name="style" placeholder="请选择至多3项">
+                        <el-option
+                            v-for="item in styles"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </div>
+                <div>
                     <label>歌曲上传</label>
                     <input type="file" name="file">
                 </div>
@@ -108,7 +119,6 @@
                 <el-button size="mini" @click="addSong">确定</el-button>                
             </span>
         </el-dialog>
-
         <el-dialog title="修改歌曲" :visible.sync="editVisible" width="400px" center>
             <el-form :model="form" ref="form" label-width="80px">
                 <el-form-item prop="name" label="歌名" size="mini">
@@ -116,11 +126,20 @@
                 </el-form-item>                
                 <el-form-item prop="album" label="专辑" size="mini">
                     <el-input v-model="form.album" placeholder="专辑"></el-input>
-                </el-form-item> 
+                </el-form-item>
                 <el-form-item prop="lyric" label="歌词" size="mini">
                     <el-input v-model="form.lyric" placeholder="歌词" type="textarea"></el-input>
-                </el-form-item> 
-                
+                </el-form-item>  
+                <el-form-item prop="style" label="风格" size="mini">
+                    <el-select v-model="form.style" multiple :multiple-limit=3 placeholder="请选择至多3项">
+                        <el-option
+                            v-for="item in styles"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
             </el-form>
             <span slot="footer">
                 <el-button size="mini" @click="editVisible = false">取消</el-button>
@@ -167,13 +186,17 @@ export default {
                 name: '',
                 singerName: '',                
                 album: '',
-                lyric: ''
+                lyric: '',
+                style: ''
             },
+            songStyle:['流行', '华语'],
+            checkedStyles: ['流行', '华语'], //默认歌单风格
             form:{      //编辑框
                 id: '',
                 name: '',
                 album: '',
                 lyric: '',
+                style: ''
             },
             songName: '', //搜索全部输入框歌手姓名
             tableData: [], //表格数据
@@ -185,7 +208,32 @@ export default {
             idx: -1,  //当前选择项
             multipleSelection: [],   //哪些项已经打勾
             toggle: false,           //播放器的图标状态
-            song: {} //歌曲对象
+            song: {}, //歌曲对象
+            styles: [{
+                value: '华语',
+                label: '华语'
+            }, {
+                value: '粤语',
+                label: '粤语'
+            }, {
+                value: '欧美',
+                label: '欧美'
+            }, {
+                value: '日韩',
+                label: '日韩'
+            }, {
+                value: '摇滚',
+                label: '摇滚'
+            }, {
+                value: '民谣',
+                label: '民谣'
+            }, {
+                value: '流行',
+                label: '流行'
+            }, {
+                value: '选项8',
+                label: '其他'
+            }] //所有歌曲风格
         }
     },
     computed:{
@@ -222,6 +270,9 @@ export default {
         this.$store.commit('setIsPlay',false);
     },
     methods:{
+        handleCheckedCitiesChange(value){
+            this.form.style=value
+        },
         //获取当前页
         handleCurrentChange(val){
             this.pageNum = val;
@@ -248,8 +299,8 @@ export default {
         addSong(){
             let _this = this;
             var form = new FormData(document.getElementById('tf'));
+            form.set('style', _this.songStyle.toString())
             form.append('singerId',this.singerId);
-            // form.set('name',this.singerName+'-'+form.get('name'));
             form.set('name', form.get('name'));
             if(!form.get('lyric')){
                 form.set('lyric','[00:00:00]暂无歌词');
@@ -273,6 +324,7 @@ export default {
             req.send(form);
             _this.centerDialogVisible = false;
         },
+
         //弹出编辑页面
         handleEdit(row){
             this.editVisible = true;
@@ -281,6 +333,7 @@ export default {
                 name: row.name,
                 album: row.album,
                 lyric: row.lyric,
+                style: row.style,
             }
         },
         //保存编辑页面修改的数据
@@ -289,6 +342,7 @@ export default {
             this.song.name = this.form.name;
             this.song.album = this.form.album;
             this.song.lyric = this.form.lyric;
+            this.song.style = this.form.style.toString();
             var song1 = this.song
 
             updateSong(song1)

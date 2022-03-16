@@ -28,16 +28,16 @@
         <el-dialog title="添加歌曲" :visible.sync="centerDialogVisible" width="400px" center>
             <el-form :model="registerForm" ref="registerFormNode" action="" id="tf" label-width="70px">
                 <el-form-item prop="singerName"  size="mini" label="歌手名:">
-                    <el-select  v-model="registerForm.singerName" placeholder="请输入歌手名" 
+                    <el-select  v-model="registerForm.singerName" placeholder="请输入歌手名" 
                     :remote="true"
-                    style="width: 100%;"
+                    style="width: 100%;"
                     reserve-keyword
                     @change="singerChange"
                     :filterable="true">
-                    <el-option v-for="item in allSingerTable" 
+                    <el-option v-for="item in allSingerTable" 
                         :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
+                        :label="item.name"
+                        :value="item.id">
                     </el-option>
                     </el-select>
                 </el-form-item>        
@@ -45,13 +45,13 @@
                     <el-select
                     v-model="registerForm.songName" placeholder="请输入歌曲名"
                     :remote="true"
-                    style="width: 100%;"
+                    style="width: 100%;"
                     reserve-keyword
                     :filterable="true">
-                    <el-option v-for="item in songTable" 
+                    <el-option v-for="item in songTable" 
                         :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
+                        :label="item.name"
+                        :value="item.id">
                     </el-option>
                     </el-select>
                 </el-form-item> 
